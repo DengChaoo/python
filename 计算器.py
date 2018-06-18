@@ -1,68 +1,48 @@
 # -*- coding: utf-8 -*-
-
 import math
 from tkinter import *
 
-#stack class; it will be required for evaluation of expressions
 class Stack:
 	def __init__ (self):
 		self.items = []
-
 	def isEmpty (self):
 		return self.items == []
-
 	def push (self, item):
 		self.items.append (item)
-
 	def pop (self):
 		return self.items.pop ()
-
 	def peek (self):
 		return self.items [-1]
-
 	def size (self):
 		return len (self.items)
 
-
-#calculator class: the class which implements our Calculator
 class Calculator (Stack):
 	s = Stack ()
 
-	#this is the expression that will show up on the calculator when we press buttons
-	exprsn = "0"
+	exprsn = "0"        #这是当我们按下按钮时会在计算器上显示的表达式
+	act_exprsn = ""     #这是程序运行时计算的实际数学表达式
+	state = 0           #这个变量表示计算器的状态：0 - 重置或在开始时；1 - 在输入表达式过程中；2 - 计算刚刚完成，结果返回
 
-	#this is the actual space separated mathematical expression on which the program operates
-	act_exprsn = ""
-
-	#this variable keeps track of the state of calculator
-	# 0 - reset or at the start
-	# 1 - in the middle of an expression
-	# 2 - calculation has just been performed and the result returned
-	state = 0
-
-	#the constructor function - puts every visible object in place
 	def __init__ (self):
-
-		#creating the root window
+		#创建窗口
 		self.root = Tk ()
-		self.root.title ("My Scientific Calculator")
+		self.root.title ("科学计算器")
 		self.root.resizable (0,0)
 
-		#label for credit
 		self.calccredit = Label (self.root, text = "\nDesigned by Ankan Poddar", font = "Verdana 7 italic", justify = RIGHT, anchor = "e", width = 40)
 		self.calccredit.grid (row = 8, column = 0, columnspan = 6)
 
-		#label for expression
+		#设置表达式格式
 		self.calcexpr = Label (self.root, text = "", font = "Helvetica 13 italic", anchor = "e", width = 25)
 		self.calcexpr.grid (row = 0, column = 0, columnspan = 5)
 		self.calcexpr.bind ('<KeyRelease>', self.handleKeypress)
 		self.calcexpr.focus_set()
 
-		#label for answer
+		#设置结果格式
 		self.calcans = Label (self.root, text = self.exprsn, bg = "white", font = "Helvetica 16", anchor = "e", width = 21, relief = RIDGE)
 		self.calcans.grid (row = 1, column = 0, columnspan = 5, pady = 10)
 
-		#buttons from 0 through 9
+		#0-9按钮
 		self.zero = Button (self.root, text="0", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.zero.grid (row = 7, column = 1, pady = 2)
 		self.zero.bind ('<Button-1>', lambda event: self.putDigit (event, 0))
@@ -103,7 +83,7 @@ class Calculator (Stack):
 		self.nine.grid (row = 4, column = 3, pady = 2)
 		self.nine.bind ('<Button-1>', lambda event: self.putDigit (event, 9))
 
-		#buttons for paranthesis
+		#括号
 		self.openpar = Button (self.root, text="(", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.openpar.grid (row = 3, column = 1, pady = 2)
 		self.openpar.bind ('<Button-1>', self.putOpenPar)
@@ -112,7 +92,7 @@ class Calculator (Stack):
 		self.closepar.grid (row = 3, column = 2, pady = 2)
 		self.closepar.bind ('<Button-1>', self.putClosePar)
 
-		#buttons for mathematical constants, e and pi
+		#常量π、e按钮
 		self.pi = Button (self.root, text="π", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.pi.grid (row = 2, column = 3, pady = 2)
 		self.pi.bind ('<Button-1>', lambda event: self.putConstant (event, "π", repr (math.pi)))
@@ -126,15 +106,17 @@ class Calculator (Stack):
 		self.decimal.grid (row = 7, column = 2, pady = 2)
 		self.decimal.bind ('<Button-1>', self.putDecimal)
 
-		#buttons for unary opearators
+		#小数点
 		self.factorial = Button (self.root, text="!", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.factorial.grid (row = 2, column = 0, pady = 2, padx = (3,0))
 		self.factorial.bind ('<Button-1>', self.calcFactorial)
-
+		
+                #开方
 		self.sqrt = Button (self.root, text="√", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.sqrt.grid (row = 2, column = 2, pady = 2)
 		self.sqrt.bind ('<Button-1>', self.calcSqrt)
 
+		#三角函数
 		self.sin = Button (self.root, text="sin", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.sin.grid (row = 3, column = 0, pady = 2, padx = (3,0))
 		self.sin.bind ('<Button-1>', lambda event: self.putUnaryOper (event, "sin"))
@@ -147,6 +129,7 @@ class Calculator (Stack):
 		self.tan.grid (row = 5, column = 0, pady = 2, padx = (3,0))
 		self.tan.bind ('<Button-1>', lambda event: self.putUnaryOper (event, "tan"))
 
+		#对数
 		self.ln = Button (self.root, text="ln", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.ln.grid (row = 6, column = 0, pady = 2, padx = (3,0))
 		self.ln.bind ('<Button-1>', lambda event: self.putUnaryOper (event, "ln"))
@@ -155,7 +138,7 @@ class Calculator (Stack):
 		self.log.grid (row = 7, column = 0, pady = 2, padx = (3,0))
 		self.log.bind ('<Button-1>', lambda event: self.putUnaryOper (event, "log"))
 
-		#buttons for binary operators i.e., +, -, *, /, ^\
+		#加减乘除、指数
 		self.add = Button (self.root, text="+", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.add.grid (row = 7, column = 4, pady = 2, padx = (0,3))
 		self.add.bind ('<Button-1>', lambda event: self.putBinaryOper  (event, "+", "+"))
@@ -176,7 +159,7 @@ class Calculator (Stack):
 		self.exponent.grid (row = 2, column = 1, pady = 2)
 		self.exponent.bind ('<Button-1>', lambda event: self.putBinaryOper  (event, "^", "^"))
 
-		#clear buttons
+		#清除
 		self.allclear = Button (self.root, text="AC", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.allclear.grid (row = 2, column = 4, pady = 2, padx = (0,3))
 		self.allclear.bind ('<Button-1>', self.clearAll)
@@ -185,15 +168,14 @@ class Calculator (Stack):
 		self.clear.grid (row = 3, column = 4, pady = 2, padx = (0,3))
 		self.clear.bind ('<Button-1>', self.delete)
 
-		#button for the equals to operator
+		#等于
 		self.equals = Button (self.root, text="=", font = "Verdana 12", relief = RAISED, bd = 3, width = 2)
 		self.equals.grid (row = 7, column = 3, pady = 2)
 		self.equals.bind ('<Button-1>', self.evaluate)
 
-		#finally set the mainloop
 		self.root.mainloop ()
 
-	#this functions checks if the last token in the actual expression list is a number; return True for numbers and False for non-numbers
+	#检查实际表达式列表中的最后一个标记是否是一个数字; 数字返回True，非数字返回False
 	def chcknum (self, token):
 		try:
 			t = float (token)
@@ -201,7 +183,7 @@ class Calculator (Stack):
 		except ValueError:
 			return False
 
-	#this function handles the pressing of keys on keyboard
+	#按键
 	def handleKeypress (self, event):
 		if event.char in "0123456789":
 			try:
@@ -223,10 +205,8 @@ class Calculator (Stack):
 			self.clearAll (event)
 		elif ord (event.char) == 13:
 			self.evaluate (event)
-		# else:
-		# 	print event.char, ord (event.char)
 
-	#this function deals with putting digits appropriately
+	#处理数字
 	def putDigit (self, event, digit):
 		ls = self.act_exprsn.split ()
 		if self.state == 0 or self.state == 2:
@@ -241,7 +221,7 @@ class Calculator (Stack):
 			self.exprsn += repr (digit)
 		self.calcans.config (text = self.exprsn)
 
-	#puts the mathematical constants, e and Pi, after required checking according to the conditions
+	#将显示表达式和计算表达式进行转换
 	def putConstant (self, event, symbol, val):
 		ls = self.act_exprsn.split ()
 		if self.state == 0 or self.state == 2:
@@ -256,7 +236,6 @@ class Calculator (Stack):
 			self.exprsn += symbol
 		self.calcans.config (text = self.exprsn)
 
-	#puts the open paranthesis after required checking according to the conditions
 	def putOpenPar (self, event):
 		ls = self.act_exprsn.split ()
 		if self.state == 0 or self.state == 2:
@@ -271,7 +250,6 @@ class Calculator (Stack):
 			self.exprsn += "("
 		self.calcans.config (text = self.exprsn)
 
-	#puts the closed paranthesis after required checking according to the conditions
 	def putClosePar (self, event):
 		if self.state == 0 or self.state == 2:
 			self.act_exprsn = ") "
@@ -282,7 +260,6 @@ class Calculator (Stack):
 			self.exprsn += ")"
 		self.calcans.config (text = self.exprsn)
 
-	#this function handles the putting of decimal point properly
 	def putDecimal (self, event):
 		ls = self.act_exprsn.split ()
 		if self.state == 0 or self.state == 2:
@@ -297,7 +274,6 @@ class Calculator (Stack):
 			self.exprsn += "."
 		self.calcans.config (text = self.exprsn)
 
-	#this function handles the binary operators i.e., +, -, *, /, ^
 	def putBinaryOper (self, event, operator, symbol):
 		ls = self.act_exprsn.split ()
 		if self.state == 0:
@@ -323,7 +299,6 @@ class Calculator (Stack):
 			self.exprsn += symbol
 		self.calcans.config (text = self.exprsn)
 
-	#this function handles the unary operators i.e., sin, cos, tan, log, ln
 	def putUnaryOper (self, event, operator):
 		ls = self.act_exprsn.split ()
 		if self.state == 0 or self.state == 2:
@@ -338,7 +313,6 @@ class Calculator (Stack):
 			self.exprsn += operator + "("
 		self.calcans.config (text = self.exprsn)
 
-	#this function handles the square root
 	def calcSqrt (self, event):
 		ls = self.act_exprsn.split ()
 		if self.state == 0 or self.state == 2:
@@ -353,7 +327,6 @@ class Calculator (Stack):
 			self.exprsn += "√"
 		self.calcans.config (text = self.exprsn)
 
-	#this function handles the factorial
 	def calcFactorial (self, event):
 		ls = self.act_exprsn.split ()
 		if self.state == 0 or self.state == 2:
@@ -369,7 +342,6 @@ class Calculator (Stack):
 			self.exprsn += "!"
 		self.calcans.config (text = self.exprsn)
 
-	#the clear function which clears one digit at a time
 	def delete (self, event):
 		ls = self.act_exprsn.split ()
 		if self.state == 0 or self.state == 2:
@@ -387,12 +359,8 @@ class Calculator (Stack):
 			if len (self.exprsn) == 0:
 				self.exprsn = "0"
 				self.state = 0
-		# else:
-		# 	self.act_exprsn = ""
-		# 	self.exprsn = "0"
 		self.calcans.config (text = self.exprsn)
 
-	#the all clear function
 	def clearAll (self, event):
 		self.act_exprsn = ""
 		self.exprsn = "0"
@@ -400,7 +368,6 @@ class Calculator (Stack):
 		self.calcans.config (text = self.exprsn)
 		self.calcexpr.config (text = "")
 
-	#calls the infixEval function with the proper expression, does error checking and resets everything
 	def evaluate (self, event):
 		try:
 			res = self.infixEval ()
@@ -421,8 +388,7 @@ class Calculator (Stack):
 			self.exprsn = "∞"
 			self.state = 2
 
-
-	#evaluates an infix expression by converting it to postfix and then solves it using stack
+	#通过将中缀表达式转换为后缀来评估中缀表达式，然后使用堆栈解决它
 	def infixEval (self):
 		s = Stack ()
 		outlst = []
@@ -540,16 +506,12 @@ class Calculator (Stack):
 				s.push (token)
 
 		result = round (float (s.pop ()), 15)
-		# if not s.isEmpty ():
-		# 	while not s.isEmpty ():
-				# if self.chcknum (s.pop ()):
-				# 	raise IndexError
 		if math.floor (result) == math.ceil (result) and not abs(result)//10**16:
 			return int (result)
 		else:
 			return result
 
-#main function
+		
 def main ():
 	mycalc = Calculator ()
 
