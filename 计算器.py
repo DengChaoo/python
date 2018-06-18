@@ -29,7 +29,7 @@ class Calculator (Stack):
 		self.root.title ("科学计算器")
 		self.root.resizable (0,0)
 
-		self.calccredit = Label (self.root, text = "\nDesigned by Ankan Poddar", font = "Verdana 7 italic", justify = RIGHT, anchor = "e", width = 40)
+		self.calccredit = Label (self.root, text = "\nDesigned by Red Nation", font = "Verdana 7 italic", justify = RIGHT, anchor = "e", width = 40)
 		self.calccredit.grid (row = 8, column = 0, columnspan = 6)
 
 		#设置表达式格式
