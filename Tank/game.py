@@ -3,6 +3,7 @@ from pygame.locals import *
 import math
 import random
 
+#设置战场
 def expand_battle_field():
     for row in small_battle_field:
         new_row = []
@@ -23,15 +24,15 @@ def draw_battle_field():
     for row_index in range(y_max):
         for column_index in range(x_max):
             if battle_field[row_index][column_index] == 1:
-                # is a brick_wall
+                # 砖墙
                 screen.blit(brick_wall_img, (column_index * 30, row_index * 30))
             if battle_field[row_index][column_index] == 2:
-                # is a cement_wall
+                # 水泥墙
                 screen.blit(cement_wall_img, (column_index * 30, row_index * 30))
             if symbol_position != None:
                 continue
             if battle_field[row_index][column_index] == 3:
-                # is a symbol
+                # 基地符号
                 symbol_position = (column_index, row_index)
                 symbol_area = (
                         (column_index, row_index),
@@ -43,6 +44,7 @@ def draw_battle_field():
     else:
         screen.blit(symbol_img, (symbol_position[0] * 30, symbol_position[1] * 30))
 
+#随机产生敌人
 def produce_enemy(time):
     global last_product
     global enemys_cur_number
@@ -83,6 +85,7 @@ def produce_enemy(time):
     last_product = time
     enemys_cur_number += 1
 
+#坦克
 class ArmoredCar():
     def __init__(self, p_position, p_direction, p_image, p_fire_interval):
         self.position = p_position
@@ -204,7 +207,6 @@ class Tank(ArmoredCar):
     def __init__(self):
         ArmoredCar.__init__(self, tank_init_position, 'U', tank_img_U, 300)
         self.life = 3
-        # for future use
         self.buf = []
 
     def attacked(self):
@@ -226,7 +228,6 @@ class Tank(ArmoredCar):
 class Enemy(ArmoredCar):
     def __init__(self, p_init_position):
         ArmoredCar.__init__(self, p_init_position, 'D', enemy_img_D, 800)
-        # for future use
 
         self.damaged = 0
         self.limitation = 1
@@ -260,6 +261,7 @@ class Enemy(ArmoredCar):
         elif self.direction == 'L':
             self.left()
 
+#子弹
 class Missile():
     def __init__(self, direction, p_position, image):
         self.image = image
@@ -287,7 +289,6 @@ class Missile():
                     p_position[0] * 30 - missile_img_width,
                     p_position[1] * 30 + 30 - missile_img_height / 2]
 
-        # for future use
         self.damage = 1
 
     def draw(self):
@@ -431,10 +432,10 @@ class EnemyMissile(Missile):
 
         self.draw()
 
-# blank         0
-# brick_wall    1
-# cement_wall   2
-# symbol        3
+# 空白         0
+# 砖墙         1
+# 水泥墙       2
+# 基地符号     3
 small_battle_field = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0],
@@ -496,7 +497,7 @@ enemys_max_number = 10
 tank = Tank()
 enemys = []
 
-# up, left, down, right, fire
+# 上下左右、攻击
 keys = [False, False, False, False, False]
 last_move = -1
 move_interval = 200
